@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech and Speech to Text</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Text to Speech and Speech to Text</h1>
+
+    <!-- TTS Form -->
+    <h2>Text to Speech</h2>
+    <form method="post" action="{% url 'tts' %}">
+        {% csrf_token %}
+        <textarea name="text" rows="5" cols="40"></textarea><br>
+        <label for="voice_id">Voice:</label>
+        <select name="voice_id">
+            <option value="Joanna">Joanna</option>
+            <option value="Matthew">Matthew</option>
+            <option value="Seoyeon">Seoyeon</option>
+            <option value="Hans">Hans</option>
+        </select><br>
+        <button type="submit">Convert to Speech</button>
+    </form>
+
+    <!-- STT Form -->
+    <h2>Speech to Text</h2>
+    <form method="post" action="{% url 'speech_to_text' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="audio_file" accept="audio/*"><br>
+        <button type="submit">Convert to Text</button>
+    </form>
+
+    <!-- Display Result -->
+    {% if transcript %}
+        <h2>Transcription Result</h2>
+        <p>{{ transcript }}</p>
+    {% endif %}
+</body>
+</html>
+
+
