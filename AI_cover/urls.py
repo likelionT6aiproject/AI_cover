@@ -24,3 +24,4 @@ urlpatterns = [
     path('tts/', views.tts, name='tts'),
     path('speech_to_text/', views.speech_to_text, name='speech_to_text'),
 ]
+#
