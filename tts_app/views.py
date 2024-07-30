@@ -1,17 +1,34 @@
 import boto3
-import os
-import time
 import uuid
+import time
+import os
 import requests
 from django.shortcuts import render
 from django.http import JsonResponse
 from pygame import mixer
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
+from django.conf import settings  # settings.py에서 환경 변수를 가져오기 위해 추가
 
-# Amazon Polly 및 Transcribe 클라이언트 생성
-polly_client = boto3.client('polly', region_name='ap-northeast-2')
-transcribe_client = boto3.client('transcribe', region_name='ap-northeast-2')
+# AWS 클라이언트 생성
+polly_client = boto3.client(
+    'polly',
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=settings.AWS_DEFAULT_REGION
+)
+transcribe_client = boto3.client(
+    'transcribe',
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=settings.AWS_DEFAULT_REGION
+)
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=settings.AWS_DEFAULT_REGION
+)
 
 def text_to_speech(text, voice_id='Joanna'):
     response = polly_client.synthesize_speech(
@@ -40,7 +57,6 @@ def speech_to_text(request):
         job_uri = f's3://{input_bucket_name}/{file_name}'
 
         # S3에 파일 업로드
-        s3_client = boto3.client('s3', region_name='ap-northeast-2')
         s3_client.upload_file(file_path, input_bucket_name, file_name)
 
         # Transcribe 작업 시작
@@ -61,7 +77,7 @@ def speech_to_text(request):
 
         if status == 'COMPLETED':
             transcript_file_uri = result['TranscriptionJob']['Transcript']['TranscriptFileUri']
-            
+
             # 응답 상태 코드 및 본문 확인
             try:
                 transcript_response = requests.get(transcript_file_uri)
@@ -106,3 +122,4 @@ def tts(request):
 
         return render(request, 'index.html', {'audio_file': output_file})
     return render(request, 'index.html')
+
